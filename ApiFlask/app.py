@@ -1,4 +1,4 @@
-from flask import Flask , jsonify
+from flask import Flask , jsonify , request
 
 app = Flask('ApiFlask')
 
@@ -23,6 +23,16 @@ def hello_word():
 def get_books():
     return jsonify ({'books':books})
 
+@app.route('/books',methods=['POST'])
+def add_book():
+    data = request.get_json()
+    if (check_book(data)):
+        books.insert(0,data)
+        return "True"
+    else: 
+        return "False"
+
+
 @app.route('/books/<int:isbn>')
 def get_book_by_isbn(isbn):
     return_value ={}
@@ -30,5 +40,11 @@ def get_book_by_isbn(isbn):
         if book["isbn"] == isbn :
             return_value = book
     return jsonify (return_value)
+
+def check_book(book):
+    if ("name" in book and "price" in book and "isbn" in book):
+        return "true"
+    else : 
+        return "false"
 
 app.run(port=5000)
