@@ -1,6 +1,8 @@
-from flask import Flask , jsonify , request , Response , json
+from flask import Flask , jsonify , request , Response 
+import json
+from settings import *
 
-app = Flask('ApiFlask')
+
 
 books = [
     {
@@ -21,6 +23,7 @@ def hello_to_myapi():
     return 'Hello to My Api Rest with Flask'
 
 @app.route('/books')
+
 def get_books():
     return jsonify ({'books':books})
 
