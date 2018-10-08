@@ -1,5 +1,5 @@
-from flask import flask
+from flask import Flask
 
-app = Flask('ApiFlask')
-app['SQLALCHEMY_DATABASE_URI'] = "sqlite:C:\Users\aachaari\Documents\GitHub\FLASKANDREACT\ApiFlask\database.db"
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///books.sqlite3"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
