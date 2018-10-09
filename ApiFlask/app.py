@@ -3,7 +3,6 @@ import json
 from settings import *
 from BookModel import *
 
-
 @app.route('/')
 def hello_to_myapi():
     return 'Hello to My Api Rest with Flask'
@@ -15,12 +14,6 @@ def get_books():
 @app.route('/books/<int:isbn>')
 def get_book(isbn):
     return jsonify(get_book_byisbn(isbn))
-
-def check_book(book):
-    if ("name" in book and "price" in book and "isbn" in book):
-        return "True"
-    else : 
-        return "False"
 
 @app.route('/books',methods=['POST'])
 def Add_book():
@@ -38,12 +31,11 @@ def Add_book():
         response = Response(json.dumps(errorInvalidObjectMessage),400,mimetype='application/json')
         return response
 
-
 @app.route('/books/<int:isbn>', methods=['Delete'])
 def Delete_book(isbn):
     operationResult = delete_book(isbn)
     if (operationResult == "True"):
-        response = Response(json.dumps("Book Deleted"),206,mimetype='application/json')
+        response = Response(json.dumps("Book Deleted"),204,mimetype='application/json')
         return response
     else :
         errorInvalidObjectMessage = {
@@ -51,7 +43,6 @@ def Delete_book(isbn):
         }
         response = Response(json.dumps(errorInvalidObjectMessage),400,mimetype='application/json')
         return response
-
 
 @app.route('/books/<int:isbn>', methods=['PUT'])
 def Replacebook(isbn):
@@ -99,5 +90,18 @@ def patch_book(isbn):
         }
         response = Response(json.dumps(errorInvalidObjectMessage),400,mimetype='application/json')
         return response
+
+
+
+
+
+def check_book(book):
+    if ("name" in book and "price" in book and "isbn" in book):
+        return "True"
+    else : 
+        return "False"
+
+
+
 
 app.run(port=5000)
