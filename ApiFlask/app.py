@@ -1,21 +1,51 @@
-from flask import Flask , jsonify , request , Response 
+from flask import Flask , jsonify , request , Response, render_template
+import jwt, datetime
 import json
 from settings import *
 from BookModel import *
+from userModel import User
+from functools import wraps
 
 @app.route('/')
 def hello_to_myapi():
-    return 'Hello to My Api Rest with Flask'
+    bok=get_all_books()
+    return render_template('index.html', title='Home', result=bok)
+
+@app.route('/login', methods=['POST'])
+def get_token():
+    request_data = request.get_json()
+    username = str(request_data['username'])
+    password = str(request_data['password'])
+    match = User.matchusernamepassword(username,password)
+    if match:
+        expirationDate = datetime.datetime.utcnow() + datetime.timedelta(seconds=1000)
+        token=jwt.encode({'exp': expirationDate},app.config['SECRET_KEY'], algorithm='HS256')
+        return token
+    else:
+        return Response('', 401, mimetype='application/json')
+def token_required(f):
+    @wraps(f)
+    def wrapper(*arg,**kwargs):
+        token= request.args.get('token')
+        try:
+            jwt.decode(token,app.config['SECRET_KEY'])
+            return f(*arg,**kwargs)
+        except:
+            return jsonify({'error':'Need a valid token to view this page'}),401
+    return wrapper
 
 @app.route('/books')
+@token_required
 def get_books():
     return jsonify(get_all_books())
 
 @app.route('/books/<int:isbn>')
+@token_required
 def get_book(isbn):
     return jsonify(get_book_byisbn(isbn))
 
 @app.route('/books',methods=['POST'])
+@token_required
 def Add_book():
     data = request.get_json()
     if (check_book(data)== "True"):
@@ -32,6 +62,7 @@ def Add_book():
         return response
 
 @app.route('/books/<int:isbn>', methods=['Delete'])
+@token_required
 def Delete_book(isbn):
     operationResult = delete_book(isbn)
     if (operationResult == "True"):
@@ -45,6 +76,7 @@ def Delete_book(isbn):
         return response
 
 @app.route('/books/<int:isbn>', methods=['PUT'])
+@token_required
 def Replacebook(isbn):
     data = request.get_json()
     if (check_book(data)== "True"):
@@ -67,6 +99,7 @@ def Replacebook(isbn):
         return response
 
 @app.route('/books/<int:isbn>', methods=['PATCH'])
+@token_required
 def patch_book(isbn):
     data = request.get_json()
     if ("name" in data or "price" in data):
@@ -92,16 +125,10 @@ def patch_book(isbn):
         return response
 
 
-
-
-
 def check_book(book):
     if ("name" in book and "price" in book and "isbn" in book):
         return "True"
     else : 
         return "False"
-
-
-
 
 app.run(port=5000)
